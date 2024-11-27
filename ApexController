@@ -1,0 +1,45 @@
+public class SalesforceConnect {
+
+    @AuraEnabled(cacheable=true)
+    public static List<String> createCasesb() {
+
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint('callout:afins_dc_jul_2024_nc/services/data/v61.0/ssot/queryv2');
+        request.setTimeout(120000);
+        request.setMethod('POST');
+        request.setHeader('Content-Type', 'application/json;charset=UTF-8');
+
+        // Set the request body with properly escaped single quotes
+        request.setBody('{"sql" : "select ssot__LastName__c from ssot__Individual__dlm where ssot__FirstName__c=\'C\'"}');
+
+        // Send the HTTP request
+        HttpResponse response = http.send(request);
+
+        // Initialize the list of last names
+        List<String> lastNames = new List<String>();
+
+        // Process the response
+        if (response.getStatusCode() == 200 || response.getStatusCode() == 201) {
+            // Deserialize the response
+            Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
+
+            // Check if the "data" key exists and contains the expected list of lists
+            if (responseMap.containsKey('data')) {
+                List<Object> data = (List<Object>) responseMap.get('data');
+
+                // Extract last names from the data and add to the list
+                for (Object row : data) {
+                    List<Object> rowList = (List<Object>) row;
+
+                    // Add the first element (last name) to the list
+                    if (!rowList.isEmpty()) {
+                        lastNames.add((String) rowList[0]);
+                    }
+                }
+            }
+        }
+
+        return lastNames;
+    }
+}
