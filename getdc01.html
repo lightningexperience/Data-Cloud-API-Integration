@@ -1,0 +1,14 @@
+<template>
+    <lightning-card title="Last Names">
+        <template if:true={lastNames}>
+            <ul>
+                <template for:each={lastNames} for:item="lastName">
+                    <li key={lastName}>{lastName}</li>
+                </template>
+            </ul>
+        </template>
+        <template if:true={error}>
+            <p class="slds-text-color_error">Error: {error.message}</p>
+        </template>
+    </lightning-card>
+</template>
